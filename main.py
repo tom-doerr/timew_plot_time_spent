@@ -2,8 +2,11 @@
 
 import subprocess
 from matplotlib import pyplot as plt
+import sys
 
-result = subprocess.run(['timew', 'month'], stdout=subprocess.PIPE)
+SMOOTHING_FACTOR = 0.9
+
+result = subprocess.run(['timew', 'month', '2021-01-01', '-', 'tomorrow'] + sys.argv[1:], stdout=subprocess.PIPE)
 
 #print(str(result.stdout).split('\\\n'))
 hours_spent_list = []
@@ -19,4 +22,13 @@ for e in str(result.stdout).split('\\n')[2:-8]:
     hours_spent_list.append(hours_spent)
     #print(e)
 
-plt.plot(hours_spent_list)
+hours_spent_list_smoothed = []
+smoothed_val = hours_spent_list[0] 
+for e in hours_spent_list:
+    smoothed_val = SMOOTHING_FACTOR * smoothed_val + (1 - SMOOTHING_FACTOR) * e
+    hours_spent_list_smoothed.append(smoothed_val)
+
+
+#plt.plot(hours_spent_list)
+plt.plot(hours_spent_list_smoothed)
+plt.show()
